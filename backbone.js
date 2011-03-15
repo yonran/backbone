@@ -820,7 +820,7 @@
   // This should be prefered to global lookups, if you're dealing with
   // a specific view.
   var selectorDelegate = function(selector) {
-    return $(selector, this.el);
+    return this._$(selector, this.el);
   };
 
   // Cached regex to split keys for `delegate`.
@@ -836,6 +836,7 @@
     tagName : 'div',
 
     // Attach the `selectorDelegate` function as the `$` property.
+    // Not to be confused with _$, the jQuery/Zepto function.
     $       : selectorDelegate,
 
     // Initialize is an empty function by default. Override it with your own
@@ -852,7 +853,7 @@
     // Remove this view from the DOM. Note that the view isn't present in the
     // DOM by default, so calling this method may be a no-op.
     remove : function() {
-      $(this.el).remove();
+      this._$(this.el).remove();
       return this;
     },
 
@@ -863,8 +864,8 @@
     //
     make : function(tagName, attributes, content) {
       var el = document.createElement(tagName);
-      if (attributes) $(el).attr(attributes);
-      if (content) $(el).html(content);
+      if (attributes) this._$(el).attr(attributes);
+      if (content) this._$(el).html(content);
       return el;
     },
 
@@ -884,7 +885,7 @@
     // not `change`, `submit`, and `reset` in Internet Explorer.
     delegateEvents : function(events) {
       if (!(events || (events = this.events))) return;
-      $(this.el).unbind('.delegateEvents' + this.cid);
+      this._$(this.el).unbind('.delegateEvents' + this.cid);
       for (var key in events) {
         var methodName = events[key];
         var match = key.match(eventSplitter);
@@ -892,9 +893,9 @@
         var method = _.bind(this[methodName], this);
         eventName += '.delegateEvents' + this.cid;
         if (selector === '') {
-          $(this.el).bind(eventName, method);
+          this._$(this.el).bind(eventName, method);
         } else {
-          $(this.el).delegate(selector, eventName, method);
+          this._$(this.el).delegate(selector, eventName, method);
         }
       }
     },
@@ -908,6 +909,7 @@
         var attr = viewOptions[i];
         if (options[attr]) this[attr] = options[attr];
       }
+      this._$ = options.$ || $;
       this.options = options;
     },
 
@@ -922,7 +924,7 @@
         if (this.className) attrs['class'] = this.className;
         this.el = this.make(this.tagName, attrs);
       } else if (_.isString(this.el)) {
-        this.el = $(this.el).get(0);
+        this.el = this._$(this.el).get(0);
       }
     }
 
